@@ -1,0 +1,12 @@
+.tmp_*
+.DS_Store
+var/*
+media/*
+downloader/*
+errors/*
+includes/*
+js/*
+lib/*
+pkginfo/*
+shell/*
+app/code/core/*

@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Whitepixels Campaign Extension
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * @category   Whitepixels
+ * @package    Whitepixels_Campaign
+ * @author     Ben George
+ * @copyright  Copyright (c) 2011 Whitepixels (http://www.whitepixels.com.au)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+ -->
+<config>
+    <tabs>
+        <whitepixels_extensions translate="label" module="australia">
+            <label>White Pixels Extensions</label>
+            <sort_order>1000000</sort_order>
+        </whitepixels_extensions>
+    </tabs>	
+    <sections>
+        <whitepixels_campaigns>
+            <label>Email Campaigns</label>
+            <tab>whitepixels_extensions</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>999999</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>        	
+        	<groups>
+        		<campaignmonitor translate="label">
+				<label>Campaign Settings</label>
+				<frontend_type>text</frontend_type>
+				<sort_order>0</sort_order>
+				<show_in_default>1</show_in_default>
+				<show_in_website>1</show_in_website>
+				<show_in_store>1</show_in_store>
+				<fields>
+					<api_key translate="label">
+						<label>API Key</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>1</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>This can be found on your Account Settings.</comment>
+					</api_key>
+					<list_id translate="label">
+						<label>Customer List API ID</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>2</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Customers who are added/deleted from your store will be added/removed from this email list.</comment>
+					</list_id>
+					<guest_list_id translate="label">
+						<label>Guest List API ID</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>3</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Guests who buy from your store will be added to this email list.</comment>
+					</guest_list_id>					
+				</fields>
+			</campaignmonitor>
+        	</groups>
+        </whitepixels_campaigns>
+    </sections>
+</config>

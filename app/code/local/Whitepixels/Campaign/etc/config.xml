@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Whitepixels Campaign Extension
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * @category   Whitepixels
+ * @package    Whitepixels_Campaign
+ * @author     Ben George
+ * @copyright  Copyright (c) 2011 Whitepixels (http://www.whitepixels.com.au)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+ -->
+<config>
+	<modules>
+		<Whitepixels_Campaign>
+			<version>0.1</version>
+		</Whitepixels_Campaign>
+	</modules>	
+	<global>
+		<models>
+			<whitecampaign>
+				<class>Whitepixels_Campaign_Model</class>
+			</whitecampaign>
+		</models>
+		<helpers>
+			<whitecampaign>
+				<class>Whitepixels_Campaign_Helper</class>
+			</whitecampaign>			
+		</helpers>
+		<events>
+			<customer_save_before>
+				<observers>
+					<whitecampaign_save_observer>
+						<type>singleton</type>
+						<class>whitecampaign/customer_observer</class>
+						<method>addCustomer</method>						
+					</whitecampaign_save_observer>
+				</observers>
+			</customer_save_before>
+			<customer_delete_before>
+				<observers>
+					<whitecampaign_delete_observer>
+						<type>singleton</type>
+						<class>whitecampaign/customer_observer</class>
+						<method>deleteCustomer</method>						
+					</whitecampaign_delete_observer>					
+				</observers>				
+			</customer_delete_before>
+			<checkout_type_onepage_save_order_after>
+				<observers>
+					<whitecampaign_onepage_save_order_after_observer>
+						<type>singleton</type>
+						<class>whitecampaign/order_observer</class>
+						<method>addSubscriber</method>						
+					</whitecampaign_onepage_save_order_after_observer>
+				</observers>				
+			</checkout_type_onepage_save_order_after>	
+		</events>
+	</global>
+    <adminhtml>
+        <acl>
+            <resources>
+                <all>
+                    <title>Allow Everything</title>
+                </all>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <whitepixels_campaigns>
+                                            <title>Campaigns</title>
+                                        </whitepixels_campaigns>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+    </adminhtml>	
+</config>
