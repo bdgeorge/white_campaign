@@ -19,7 +19,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Whitepixels_Campaign_Model_List extends Whitepixels_Campaign_Model_CM_Abstract 
+class Whitepixels_Campaign_Model_Lists extends Whitepixels_Campaign_Model_CM_Abstract 
 {
 	protected $_list_base_route;
 	
@@ -57,7 +57,12 @@ class Whitepixels_Campaign_Model_List extends Whitepixels_Campaign_Model_CM_Abst
 		}	
 		
 	}
-	
+    /**
+     * Gets statistics for list subscriptions, deletions, bounces and unsubscriptions
+     * 
+	 * @param string $list_id [optional]
+	 * @return array
+     */ 	
 	public function stats($list_id = NULL)
 	{
 		if(is_null($list_id)){
@@ -72,7 +77,7 @@ class Whitepixels_Campaign_Model_List extends Whitepixels_Campaign_Model_CM_Abst
 		 */
 		$response = $this->_transport->request();
 		if($response->isSuccessful()){
-			return Zend_Json::decode($response->getBody());;
+			return Zend_Json::decode($response->getBody());
 		} else {
 			$result = Zend_Json::decode($response->getBody());					
 			Mage::log("Failed to get list stats for " . $list_id . ", Code " . $result['Code'] . ": " . $result['Message'], Zend_Log::ERR, 'WhiteCampaign.log');

@@ -41,7 +41,7 @@ class Whitepixels_Campaign_Model_Customer_Observer {
 		/**
 		 * @var Whitepixels_Campaign_Model_Subscriber
 		 */
-		$subscriber = Mage::getModel('whitecampaign/subscriber', array('store_id' => $storeId));
+		$subscriber = Mage::getModel('whitecampaign/subscribers', array('store_id' => $storeId));
 				
 		try{		
 			if($subscriber->unsubscribe($email)){
@@ -78,7 +78,7 @@ class Whitepixels_Campaign_Model_Customer_Observer {
 		/**
 		 * @var Whitepixels_Campaign_Model_Subscriber
 		 */		
-		$subscriber = Mage::getModel('whitecampaign/subscriber', array('store_id' => $storeId));
+		$subscriber = Mage::getModel('whitecampaign/subscribers', array('store_id' => $storeId));
 	
 		try{
 			if($subscriber->subscribe($email,$name)){

@@ -70,5 +70,16 @@ class Whitepixels_Campaign_Model_CM_Abstract extends Varien_Object {
 
 	}
 	
+	/**
+	 * Change the API Key and reset the transport layer AUTH ppropriately after construction
+	 * 
+	 * @param object $newKey
+	 * @return 
+	 */
+	public function changeKey($newKey)
+	{
+		$this->setApiKey($newKey);
+		$this->_transport->setAuth($this->getApiKey(),'',Zend_Http_Client::AUTH_BASIC);//TODO: Test this
+	}
 }
 ?>

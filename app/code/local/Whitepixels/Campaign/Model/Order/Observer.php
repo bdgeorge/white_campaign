@@ -46,7 +46,7 @@ class Whitepixels_Campaign_Model_Order_Observer {
 			 * 
 			 * @var Whitepixels_Campaign_Model_Subscriber
 			 */		
-			$subscriber = Mage::getModel('whitecampaign/subscriber', array('store_id' => $storeId, 'list_id' => $list));
+			$subscriber = Mage::getModel('whitecampaign/subscribers', array('store_id' => $storeId, 'list_id' => $list));
 			
 			$email = $order->getCustomerEmail();
 			$name = $order->getCustomerName();
