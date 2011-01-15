@@ -23,7 +23,9 @@
  * Same as the standard Campaign Monitor result object, except typically
  * initialised after instantiation as it will be loaded by a Mage::helper call
  */
-class Whitepixels_Campaign_Model_CS_Result {
+//TODO: Results class not being used currently, results are returned as arrays.
+// update to a Magento model and return results as that.
+class Whitepixels_Campaign_Model_CM_CS_Result {
 	
     /**
      * The deserialised result of the API call

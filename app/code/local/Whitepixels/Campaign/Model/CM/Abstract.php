@@ -71,7 +71,7 @@ class Whitepixels_Campaign_Model_CM_Abstract extends Varien_Object {
 	}
 	
 	/**
-	 * Change the API Key and reset the transport layer AUTH ppropriately after construction
+	 * Change the API Key and reset the transport layer AUTH appropriately after construction
 	 * 
 	 * @param object $newKey
 	 * @return 
