@@ -22,7 +22,7 @@
  -->
 <config>
     <tabs>
-        <whitepixels_extensions translate="label" module="australia">
+        <whitepixels_extensions translate="label" module="whitecampaign">
             <label>White Pixels Extensions</label>
             <sort_order>1000000</sort_order>
         </whitepixels_extensions>

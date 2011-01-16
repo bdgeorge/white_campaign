@@ -25,7 +25,7 @@
  */
 //TODO: Results class not being used currently, results are returned as arrays.
 // update to a Magento model and return results as that.
-class Whitepixels_Campaign_Model_CM_CS_Result {
+class Whitepixels_Campaign_Model_Cm_CS_Result {
 	
     /**
      * The deserialised result of the API call

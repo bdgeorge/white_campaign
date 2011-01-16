@@ -22,7 +22,7 @@
  * Based on the Create Send v3 API PHP wrapper but implemented in a more Zend/Magento way
  */
 
-class Whitepixels_Campaign_Model_CM_Abstract extends Varien_Object {
+class Whitepixels_Campaign_Model_Cm_Abstract extends Varien_Object {
 	
 	const BASE_ROUTE = "http://api.createsend.com/api/v3/";
 	const PROTOCOL = 'json'; //TODO: only supports JSON currently, refactor to allow xml in the response as well

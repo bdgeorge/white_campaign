@@ -19,7 +19,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Whitepixels_Campaign_Model_CM_Lists extends Whitepixels_Campaign_Model_CM_Abstract 
+class Whitepixels_Campaign_Model_Cm_Lists extends Whitepixels_Campaign_Model_Cm_Abstract 
 {
 	protected $_list_base_route;
 	
