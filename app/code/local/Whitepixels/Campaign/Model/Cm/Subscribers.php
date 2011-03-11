@@ -81,7 +81,9 @@ class Whitepixels_Campaign_Model_Cm_Subscribers extends Whitepixels_Campaign_Mod
 	 * 
 	 * @param string $email
 	 * @param string $name [optional]
-	 * @param array $customFields [optional][FUTURE] Key/Value coded array of custom fields that this list supports
+	 * @param array $customFields [optional][FUTURE] Key/Value coded array of custom fields that this list supports. 
+	 * 				These custom fields must already exist in the CM list. The Keys need to be the CM
+	 * 				'Personalisation tag', not the field name. Unknown fields are simply ignored.
 	 * @return boolean
 	 */
 	public function subscribe($email, $name = '', $customFields = '', $resubscribe = FALSE)
@@ -95,7 +97,13 @@ class Whitepixels_Campaign_Model_Cm_Subscribers extends Whitepixels_Campaign_Mod
 			'Resubscribe' => $resubscribe,
         );
 		if(is_array($customFields)){
-			//TODO: build array of custom fields, check it for sanity and append to data array
+			//Build array of custom fields and append to data array
+			//TODO: If we can work out the CM rules for field names we could validate the keys and log key violations
+			foreach($customFields as $key => $value){			
+				$tmp[] = array('Key'=>$key, 'Value'=>$value);
+			}
+			$data['CustomFields'] = $tmp;
+			Zend_Debug::dump($data['CustomFields']);
 		}
 		
 		$this->_transport->setUri($uri);		
