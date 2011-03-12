@@ -76,8 +76,9 @@ class Whitepixels_Campaign_Model_Cm_Subscribers extends Whitepixels_Campaign_Mod
 	 * @param string $email
 	 * @param string $name [optional]
 	 * @param array $customFields [optional] Key/Value coded array of custom fields that this list supports. 
-	 * 				These custom fields must already exist in the CM list. The Keys need to be the CM
-	 * 				'Personalisation tag', not the field name. Unknown fields are simply ignored.
+	 * 				These custom fields must already exist in the CM list. 
+	 * 				The Keys need to be the CM 'Personalisation tag', not the field name. 
+	 * 				Unknown fields are simply ignored.
 	 * @return string email address of subscriber just added or FALSE
 	 */
 	public function subscribe($email, $name = '', $customFields = '', $resubscribe = FALSE)

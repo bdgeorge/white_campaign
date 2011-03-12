@@ -26,63 +26,121 @@ class Whitepixels_Campaign_Model_Cm_Lists extends Whitepixels_Campaign_Model_Cm_
 	public function _construct()
 	{
 		parent::_construct();
-		$this->_list_base_route = self::BASE_ROUTE . 'lists/';
+		
+		//We need a List to work with, this can be set in the constructor or default to the configured list for this store
+		if(!$this->getListId()){
+			$list = Mage::getStoreConfig('whitepixels_campaigns/campaignmonitor/list_id', $this->getStoreId());
+			if($list){
+				$this->setListId($list);
+			} else {
+				$this->setListId('No_List_ID_Found'); //TODO how else can we fail gracefully here?
+				Mage::log("No List ID Found", Zend_Log::ERR, 'WhiteCampaign.log');
+			}
+		}		
 	}
+	
+	/**
+	 * Set the List Id to use for subscribers. 
+	 * @param string $listId
+	 * @return 
+	 */
+	public function setListId($listId)
+	{
+		//This can't be in the abstract class as the base_route differs for each child object.
+		$this->setData('list_id', $listId);
+		$this->_list_base_route = self::BASE_ROUTE . 'lists/' .$this->getListId();		
+	}		
 	
 	/**
 	 * Get List details, if no List ID is supplied it will return the list associated with the current store
 	 * 
-	 * @param string $list_id [optional]
 	 * @return array
+     * {
+     *     'ListID' => The id of the list
+     *     'Title' => The title of the list
+     *     'UnsubscribePage' => The page which subscribers are redirected to upon unsubscribing
+     *     'ConfirmedOptIn' => Whether the list is Double-Opt In
+     *     'ConfirmationSuccessPage' => The page which subscribers are
+     *         redirected to upon confirming their subscription
+     * } 
 	 */
-	public function details($list_id = NULL)
+	public function get()
 	{
-		if(is_null($list_id)){
-			$list_id = Mage::getStoreConfig('whitepixels_campaigns/campaignmonitor/list_id', $this->getStoreId());
-		}
-		$uri = $this->_list_base_route . $list_id . "." . self::PROTOCOL;
-		$this->_transport->setUri($uri);		
-		$this->_transport->setMethod(Zend_Http_Client::GET);
-		
-		/**
-		 * @var Zend_Http_Reponse
-		 */
-		$response = $this->_transport->request();
-		if($response->isSuccessful()){
-			return Zend_Json::decode($response->getBody());;
-		} else {
-			$result = Zend_Json::decode($response->getBody());		
-			Mage::log("Failed to get list details for " . $list_id . ", Code " . $result['Code'] . ": " . $result['Message'], Zend_Log::ERR, 'WhiteCampaign.log');
-			return FALSE;
-		}	
+		$route = $this->_list_base_route . "." . self::PROTOCOL;		
+		return $this->getRequest($route);	
 		
 	}
     /**
      * Gets statistics for list subscriptions, deletions, bounces and unsubscriptions
      * 
-	 * @param string $list_id [optional]
 	 * @return array
+     * {
+     *     'TotalActiveSubscribers'
+     *     'NewActiveSubscribersToday'
+     *     'NewActiveSubscribersYesterday'
+     *     'NewActiveSubscribersThisWeek'
+     *     'NewActiveSubscribersThisMonth'
+     *     'NewActiveSubscribersThisYeay'
+     *     'TotalUnsubscribes'
+     *     'UnsubscribesToday'
+     *     'UnsubscribesYesterday'
+     *     'UnsubscribesThisWeek'
+     *     'UnsubscribesThisMonth'
+     *     'UnsubscribesThisYear'
+     *     'TotalDeleted'
+     *     'DeletedToday'
+     *     'DeletedYesterday'
+     *     'DeletedThisWeek'
+     *     'DeletedThisMonth'
+     *     'DeletedThisYear'
+     *     'TotalBounces'
+     *     'BouncesToday'
+     *     'BouncesYesterday'
+     *     'BouncesThisWeek'
+     *     'BouncesThisMonth'
+     *     'BouncesThisYear'
+     * }
      */ 	
-	public function stats($list_id = NULL)
+	public function getStats()
 	{
-		if(is_null($list_id)){
-			$list_id = Mage::getStoreConfig('whitepixels_campaigns/campaignmonitor/list_id', $this->getStoreId());
-		}
-		$uri = $this->_list_base_route . $list_id . "/stats." . self::PROTOCOL;
-		$this->_transport->setUri($uri);				
-		$this->_transport->setMethod(Zend_Http_Client::GET);
-		
-		/**
-		 * @var Zend_Http_Reponse
-		 */
-		$response = $this->_transport->request();
-		if($response->isSuccessful()){
-			return Zend_Json::decode($response->getBody());
-		} else {
-			$result = Zend_Json::decode($response->getBody());					
-			Mage::log("Failed to get list stats for " . $list_id . ", Code " . $result['Code'] . ": " . $result['Message'], Zend_Log::ERR, 'WhiteCampaign.log');
-			return FALSE;
-		}	
+		$route = $this->_list_base_route . "/stats." . self::PROTOCOL;
+		return $this->getRequest($route);
 		
 	}	
+
+	/**
+     * Gets a list of all custom fields defined for the current list
+     * 
+	 * @return 
+     * array(
+     *     {
+     *         'FieldName' => The name of the custom field
+     *         'Key' => The personalisation tag of the custom field
+     *         'DataType' => The data type of the custom field
+     *         'FieldOptions' => Valid options for a multi-optioned custom field
+     *     }
+     * )
+	 */	
+	public function getCustomFields()
+	{
+		$route = $this->_list_base_route . "/customfields." .self::PROTOCOL;
+		return $this->getRequest($route);
+	}
+	
+    /**
+     * Gets a list of all segments defined for the current list
+	 *
+     * @return CS_REST_Wrapper_Result A successful response will be an object of the form
+     * array(
+     *     {
+     *         'ListID' => The current list id
+     *         'SegmentID' => The id of this segment
+     *         'Title' => The title of this segment
+     *     }
+     * )
+     */
+    public function getSegments() {
+		$route = $this->_list_base_route . "/segments." .self::PROTOCOL;
+		return $this->getRequest($route);
+    }	
 }
