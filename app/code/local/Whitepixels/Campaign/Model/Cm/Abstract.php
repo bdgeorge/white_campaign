@@ -53,9 +53,9 @@ class Whitepixels_Campaign_Model_Cm_Abstract extends Varien_Object {
 		if(!$this->getApiKey()){
 			$key = Mage::getStoreConfig('whitepixels_campaigns/campaignmonitor/api_key', $this->getStoreId());
 			if($key){
-				$this->setApiKey($key);	
+				$this->setData('api_key',$key);	
 			} else {
-				$this->setApiKey('No_Api_Key_Found'); //TODO how else can we fail gracefully here?
+				$this->setData('api_key','No_Api_Key_Found'); //TODO how else can we fail gracefully here?
 				Mage::log("No API Key found", Zend_Log::ERR, 'WhiteCampaign.log');
 			}
 			
@@ -70,16 +70,77 @@ class Whitepixels_Campaign_Model_Cm_Abstract extends Varien_Object {
 
 	}
 	
+	//TODO: Replace this with an explicit setApiKey() method rather than using the setApiKey() magic method
 	/**
-	 * Change the API Key and reset the transport layer AUTH appropriately after construction
+	 * Set the API Key and update the transport layer AUTH appropriately
 	 * 
 	 * @param object $newKey
 	 * @return 
 	 */
-	public function changeKey($newKey)
+	public function setApiKey($apiKey)
 	{
-		$this->setApiKey($newKey);
+		$this->setData('api_key', $apiKey);
 		$this->_transport->setAuth($this->getApiKey(),'',Zend_Http_Client::AUTH_BASIC);//TODO: Test this
+	}
+
+	/**
+	 * Generic GET Request
+	 * 
+	 * @param object $route The URI string for the particular GET
+	 * @param object $query [optional] Any Query string parameters as a string or array. 
+	 * 						This method will URL encode the string if required
+	 * @return Array/Boolean Array of data or False on failure
+	 */	
+	public function getRequest($route, $query="null")
+	{
+		$uri = Zend_Uri::factory($route);
+		if(!is_null($query)){
+			$uri->setQuery($query);			
+		}
+	
+		$this->_transport->setUri($uri);		
+		$this->_transport->setMethod(Zend_Http_Client::GET);
+			
+		/**
+		 * @var Zend_Http_Reponse
+		 */
+		$response = $this->_transport->request();
+		if($response->isSuccessful()){
+			return Zend_Json::decode($response->getBody());
+		} else {
+			$result = Zend_Json::decode($response->getBody());			
+			Mage::log("GET failed, Code " . $result['Code'] . ": " . $result['Message'], Zend_Log::ERR, 'WhiteCampaign.log');
+			return FALSE;
+		}		
+	}
+	
+	/**
+	 * Generic POST Request
+	 * 
+	 * @param object $route The URI string for the particular POST
+	 * @param object $data Array/Object to POST
+	 * @return Array/Boolean Array of data or False on failure
+	 */
+	public function postRequest($route, $data)
+	{
+		$uri = Zend_Uri::factory($route);
+		
+		$this->_transport->setUri($uri);		
+		$this->_transport->setMethod(Zend_Http_Client::POST);
+		$this->_transport->setRawData(json_encode($data),'text/' . self::PROTOCOL);	
+		
+		/**
+		 * @var Zend_Http_Reponse
+		 */
+		$response = $this->_transport->request();
+		if($response->isSuccessful()){
+			//Zend_Debug::dump($response);
+			return Zend_Json::decode($response->getBody());	
+		} else {		
+			$result = Zend_Json::decode($response->getBody());		
+			Mage::log("POST Failed, Code " . $result['Code'] . ": " . $result['Message'], Zend_Log::ERR, 'WhiteCampaign.log');
+			return FALSE;
+		}					
 	}
 }
 ?>

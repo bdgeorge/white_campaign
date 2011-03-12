@@ -37,42 +37,36 @@ class Whitepixels_Campaign_Model_Cm_Subscribers extends Whitepixels_Campaign_Mod
 				Mage::log("No List ID Found", Zend_Log::ERR, 'WhiteCampaign.log');
 			}
 		}	
-		
-				
-		$this->_subscribers_base_route = self::BASE_ROUTE . 'subscribers/' .$this->getListId();
 	}
+	
+	/**
+	 * Set the List Id to use for subscribers. 
+	 * @param string $listId
+	 * @return 
+	 */
+	public function setListId($listId)
+	{
+		//This can't be in the abstract class as the base_route differs for each child object.
+		$this->setData('list_id', $listId);
+		$this->_subscribers_base_route = self::BASE_ROUTE . 'subscribers/' .$this->getListId();		
+	}	
 	
 	/**
 	 * Unsubscribe an email address from the list
 	 * 
 	 * @param string $email
-	 * @return boolean
+	 * @return boolean TRUE on success
 	 */
 	public function unsubscribe($email)
 	{
-		$uri = $this->_subscribers_base_route . '/unsubscribe' . "." . self::PROTOCOL . '?pretty=true';
-		$this->_transport->setUri($uri);
+		$route = $this->_subscribers_base_route . '/unsubscribe' . "." . self::PROTOCOL;
 		
         // We need to build the subscriber data structure.
-        $email = array(
+        $data = array(
 		    'EmailAddress' => $email 
         );
-		
-		$this->_transport->setUri($uri);		
-		$this->_transport->setMethod(Zend_Http_Client::POST);
-		$this->_transport->setRawData(json_encode($email),'text/' . self::PROTOCOL);
-		
-		/**
-		 * @var Zend_Http_Reponse
-		 */
-		$response = $this->_transport->request();
-		if($response->isSuccessful()){
-			return TRUE;
-		} else {
-			$result = Zend_Json::decode($response->getBody());		
-			Mage::log("Failed to unsubscribe " . $email . ", Code " . $result['Code'] . ": " . $result['Message'], Zend_Log::ERR, 'WhiteCampaign.log');
-			return FALSE;
-		}	
+		$result = $this->postRequest($route, $data);
+		return is_null($result) ? TRUE:FALSE;
 		
 	}
 	
@@ -81,14 +75,14 @@ class Whitepixels_Campaign_Model_Cm_Subscribers extends Whitepixels_Campaign_Mod
 	 * 
 	 * @param string $email
 	 * @param string $name [optional]
-	 * @param array $customFields [optional][FUTURE] Key/Value coded array of custom fields that this list supports. 
+	 * @param array $customFields [optional] Key/Value coded array of custom fields that this list supports. 
 	 * 				These custom fields must already exist in the CM list. The Keys need to be the CM
 	 * 				'Personalisation tag', not the field name. Unknown fields are simply ignored.
-	 * @return boolean
+	 * @return string email address of subscriber just added or FALSE
 	 */
 	public function subscribe($email, $name = '', $customFields = '', $resubscribe = FALSE)
 	{
-		$uri = Zend_Uri::factory($this->_subscribers_base_route . "." . self::PROTOCOL);
+		$route = $this->_subscribers_base_route . "." . self::PROTOCOL;
 		
         // We need to build the subscriber data structure.
         $data = array(
@@ -98,56 +92,70 @@ class Whitepixels_Campaign_Model_Cm_Subscribers extends Whitepixels_Campaign_Mod
         );
 		if(is_array($customFields)){
 			//Build array of custom fields and append to data array
-			//TODO: If we can work out the CM rules for field names we could validate the keys and log key violations
+			//TODO: If we can work out the CM rules for field names we could validate the keys and log any key violations
 			foreach($customFields as $key => $value){			
 				$tmp[] = array('Key'=>$key, 'Value'=>$value);
 			}
 			$data['CustomFields'] = $tmp;
-			Zend_Debug::dump($data['CustomFields']);
+		} elseif($customFields instanceof Varian_Object) {
+			//TODO: Support _data contents from Varian_Object
 		}
-		
-		$this->_transport->setUri($uri);		
-		$this->_transport->setMethod(Zend_Http_Client::POST);
-		$this->_transport->setRawData(json_encode($data),'text/' . self::PROTOCOL);
-		
-		/**
-		 * @var Zend_Http_Reponse
-		 */
-		$response = $this->_transport->request();
-		if($response->isSuccessful()){
-			return TRUE;
-		} else {
-			$result = Zend_Json::decode($response->getBody());		
-			Mage::log("Failed to add subscriber " . $email . ", Code " . $result['Code'] . ": " . $result['Message'], Zend_Log::ERR, 'WhiteCampaign.log');
-			return FALSE;
-		}			
+		return $this->postRequest($route,$data);
 	}
 	
 	/**
-	 * Get subscriber details. Returns and array of details including any custom fields or false.
+	 * Get subscriber details. Returns an array of details including any custom fields or false.
 	 * 
 	 * @param string $email
-	 * @return array | FALSE 
+	 * @return array
+     * {
+     *     'EmailAddress' => The subscriber email address
+     *     'Name' => The subscribers name
+     *     'Date' => The date the subscriber was added to the list
+     *     'State' => The current state of the subscriber
+     *     'CustomFields' => array(
+     *         {
+     *             'Key' => The custom fields personalisation tag
+     *             'Value' => The custom field value for this subscriber
+     *         }
+     *     )
+     * } 
 	 */
-	public function subscriberDetails($email)
+	public function get($email)
 	{
-		Zend_Debug::dump($this->_subscribers_base_route . "." . self::PROTOCOL);
-		$uri = Zend_Uri::factory($this->_subscribers_base_route . "." . self::PROTOCOL);
-		$uri->setQuery('email=' . urlencode($email));
-		$this->_transport->setUri($uri);		
-		$this->_transport->setMethod(Zend_Http_Client::GET);
+		$route = $this->_subscribers_base_route . "." . self::PROTOCOL;
+		$query = array('email'=>$email);
+
+		return $this->getRequest($route, $query);
+	}
+	
+	
+	/**
+	 * Get the sending history for a specific subscriber history.
+	 * @param object $email
+	 * @return array
+     * array(
+     *     {
+     *         ID => The id of the email which was sent
+     *         Type => 'Campaign'
+     *         Name => The name of the email
+     *         Actions => array(
+     *             {
+     *                 Event => The type of action (Click, Open, Unsubscribe etc)
+     *                 Date => The date the event occurred
+     *                 IPAddress => The IP that the event originated from
+     *                 Detail => Any available details about the event i.e the URL for clicks
+     *             }
+     *         )
+     *     }
+     * )
+	 */
+	public function getHistory($email)
+	{
+		$route = $this->_subscribers_base_route . "'/history." . self::PROTOCOL;
+		$query = array('email'=>$email);
 			
-		/**
-		 * @var Zend_Http_Reponse
-		 */
-		$response = $this->_transport->request();
-		if($response->isSuccessful()){
-			$result = Zend_Json::decode($response->getBody());	
-			return $result;
-		} else {
-			$result = Zend_Json::decode($response->getBody());			
-			Mage::log("Failed to retrieve subscriber " . $email . " details, Code " . $result['Code'] . ": " . $result['Message'], Zend_Log::ERR, 'WhiteCampaign.log');
-			return FALSE;
-		}					
+		return $this->getRequest($route, $query);			
+		
 	}
 }
