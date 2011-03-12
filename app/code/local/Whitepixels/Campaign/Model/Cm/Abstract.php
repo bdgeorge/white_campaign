@@ -128,15 +128,14 @@ class Whitepixels_Campaign_Model_Cm_Abstract extends Varien_Object {
 		$this->_transport->setUri($uri);		
 		$this->_transport->setMethod(Zend_Http_Client::POST);
 		$this->_transport->setRawData(json_encode($data),'text/' . self::PROTOCOL);	
-		
+
 		/**
 		 * @var Zend_Http_Reponse
 		 */
 		$response = $this->_transport->request();
 		if($response->isSuccessful()){
-			//Zend_Debug::dump($response);
 			return Zend_Json::decode($response->getBody());	
-		} else {		
+		} else {				
 			$result = Zend_Json::decode($response->getBody());		
 			Mage::log("POST Failed, Code " . $result['Code'] . ": " . $result['Message'], Zend_Log::ERR, 'WhiteCampaign.log');
 			return FALSE;

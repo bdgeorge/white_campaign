@@ -105,6 +105,72 @@ class Whitepixels_Campaign_Model_Cm_Subscribers extends Whitepixels_Campaign_Mod
 	}
 	
 	/**
+	 * Imports an array or collection of customers into the list
+	 * 
+	 * @param array $subscribers or Mage_Customer_Model_Entity_Customer_Collection
+     *     array (
+     *         array (
+     *             'EmailAddress' => The new subscribers email address
+     *             'Name' => The name of the new subscriber
+     *             'CustomFields' => array(
+     *                 array(
+     *                     'Key' => The custom fields personalisation tag
+     *                     'Value' => The value for this subscriber
+     *                 )
+     *             )
+     *         )
+     *     )	 * 
+	 * @param object $resubscribe
+	 * @return 
+	 */
+	public function import($subscribers, $resubscribe)
+	{
+		$route = $this->_subscribers_base_route . "/import." . self::PROTOCOL;
+		$mageSubscribers = array();			
+		
+		if($subscribers instanceof Mage_Customer_Model_Entity_Customer_Collection){
+			//If we have a Mage Collection loop through it building the correct array structure
+			
+			//Get the hash of groups and websites
+	        $groups = Mage::getResourceModel('customer/group_collection')
+	            ->addFieldToFilter('customer_group_id', array('gt'=> 0))
+	            ->load()
+	            ->toOptionHash();
+			$websites = Mage::getSingleton('adminhtml/system_store')->getWebsiteOptionHash(true);				
+		
+			foreach($subscribers as $customer){				
+				$customFields = $customer->getData();
+
+				//Remove the email address and Name from the custom fields structure
+				unset($customFields['name']);
+				unset($customFields['email']);
+				
+				//Add the group and website name to the array
+				$customFields['group'] = $groups[$customer->getGroupId()];
+				$customFields['website'] = $websites[$customer->getWebsiteId()];				
+				
+				$mageSubscribers[] = array(
+										'EmailAddress'=>$customer->getEmail(),
+										'Name'=>$customer->getName(),
+										'CustomFields'=>$this->_prepareCustomFields($customFields)
+									); 
+			}
+		} elseif(is_array($subscribers)) {
+			//Shouldn't have to do anything really
+			//TODO: Test this
+			$mageSubscribers = $subcribers;
+		} else {
+			Mage::log("Import failed. Subscribers should be an array or customer collection", Zend_Log::ERR, 'WhiteCampaign.log');
+			return FALSE;
+		}
+        $data = array(
+		    'Subscribers' => $mageSubscribers,
+		    'Resubscribe' => $resubscribe,			
+        );		
+		return $this->postRequest($route, $data);
+	}
+	
+	/**
 	 * Get subscriber details. Returns an array of details including any custom fields or false.
 	 * 
 	 * @param string $email
@@ -158,5 +224,18 @@ class Whitepixels_Campaign_Model_Cm_Subscribers extends Whitepixels_Campaign_Mod
 			
 		return $this->getRequest($route, $query);			
 		
+	}
+	
+	/**
+	 * Utility function to create properly formatted CustomFields array
+	 * @param array $fields
+	 * @return 
+	 */
+	private function _prepareCustomFields($fields)
+	{
+		foreach($fields as $key => $value){			
+			$tmp[] = array('Key'=>$key, 'Value'=>$value);
+		}	
+		return $tmp;	
 	}
 }

@@ -25,33 +25,11 @@
  */
 //TODO: Results class not being used currently, results are returned as arrays.
 // update to a Magento model and return results as that.
-class Whitepixels_Campaign_Model_Cm_CS_Result {
-	
-    /**
-     * The deserialised result of the API call
-     * @var mixed
-     */
-	public $response;
 
-    /**
-     * The http status code of the API call
-     * @var int
-     */	
-	public $http_status_code;
-	
-	public function _init($response, $code)
-	{
-        $this->response = $response;
-        $this->http_status_code = $code;		
-	}
-	
-    /**
-     * Can be used to check if a call to the api resulted in a successful response.
-     * @return boolean False if the call failed. Check the response property for the failure reason.
-     * @access public
-     */
-    public function was_successful() {
-        return $this->http_status_code >= 200 && $this->http_status_code < 300;
-    }	
+//TODO: Would this be better structured as a resource approach? Is it worth it?
+
+class Whitepixels_Campaign_Model_Cm_Result extends Varien_Object
+{
+		
 }
 ?>
